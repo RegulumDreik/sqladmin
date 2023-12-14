@@ -69,6 +69,7 @@ class BaseAdmin:
         session_maker: Optional[sessionmaker] = None,
         base_url: str = "/admin",
         title: str = "Admin",
+        app_name: str = "admin",
         logo_url: Optional[str] = None,
         templates_dir: str = "templates",
         middlewares: Optional[Sequence[Middleware]] = None,
@@ -79,6 +80,7 @@ class BaseAdmin:
         self.base_url = base_url
         self.templates_dir = templates_dir
         self.title = title
+        self.app_name = app_name
         self.logo_url = logo_url
 
         if session_maker:
@@ -267,10 +269,10 @@ class BaseAdmin:
     def _build_menu(self, view: Union[ModelView, BaseView]) -> None:
         if view.category:
             menu = CategoryMenu(name=view.category)
-            menu.add_child(ViewMenu(view=view, name=view.name, icon=view.icon))
+            menu.add_child(ViewMenu(view=view, name=view.name, icon=view.icon, app_name=self.app_name))
             self._menu.add(menu)
         else:
-            self._menu.add(ViewMenu(view=view, icon=view.icon, name=view.name))
+            self._menu.add(ViewMenu(view=view, icon=view.icon, name=view.name, app_name=self.app_name))
 
 
 class BaseAdminView(BaseAdmin):
@@ -341,6 +343,7 @@ class Admin(BaseAdminView):
         session_maker: Optional[Union[sessionmaker, "async_sessionmaker"]] = None,
         base_url: str = "/admin",
         title: str = "Admin",
+        app_name: str = "admin",
         logo_url: Optional[str] = None,
         middlewares: Optional[Sequence[Middleware]] = None,
         debug: bool = False,
@@ -363,6 +366,7 @@ class Admin(BaseAdminView):
             session_maker=session_maker,
             base_url=base_url,
             title=title,
+            app_name=app_name,
             logo_url=logo_url,
             templates_dir=templates_dir,
             middlewares=middlewares,
@@ -419,7 +423,7 @@ class Admin(BaseAdminView):
         self.admin.router.routes = routes
         # self.admin.exception_handlers = {HTTPException: http_exception}
         self.admin.debug = debug
-        self.app.mount(base_url, app=self.admin, name="admin")
+        self.app.mount(base_url, app=self.admin, name=self.app_name)
 
     @login_required
     async def index(self, request: Request) -> Response:
@@ -482,7 +486,7 @@ class Admin(BaseAdminView):
 
             await model_view.delete_model(request, pk)
 
-        return Response(content=str(request.url_for("admin:list", identity=identity)))
+        return Response(content=str(request.url_for(f"{self.app_name}:list", identity=identity)))
 
     @login_required
     async def create(self, request: Request) -> Response:
@@ -615,13 +619,13 @@ class Admin(BaseAdminView):
                 request, "login.html", context, status_code=400
             )
 
-        return RedirectResponse(request.url_for("admin:index"), status_code=302)
+        return RedirectResponse(request.url_for(f"{self.app_name}:index"), status_code=302)
 
     async def logout(self, request: Request) -> Response:
         assert self.authentication_backend is not None
 
         await self.authentication_backend.logout(request)
-        return RedirectResponse(request.url_for("admin:index"), status_code=302)
+        return RedirectResponse(request.url_for(f"{self.app_name}:index"), status_code=302)
 
     async def ajax_lookup(self, request: Request) -> Response:
         """Ajax lookup route."""
@@ -655,12 +659,12 @@ class Admin(BaseAdminView):
         identifier = get_object_identifier(obj)
 
         if form.get("save") == "Save":
-            return request.url_for("admin:list", identity=identity)
+            return request.url_for(f"{self.app_name}:list", identity=identity)
         elif form.get("save") == "Save and continue editing" or (
             form.get("save") == "Save as new" and model_view.save_as_continue
         ):
-            return request.url_for("admin:edit", identity=identity, pk=identifier)
-        return request.url_for("admin:create", identity=identity)
+            return request.url_for(f"{self.app_name}:edit", identity=identity, pk=identifier)
+        return request.url_for(f"{self.app_name}:create", identity=identity)
 
     async def _handle_form_data(self, request: Request, obj: Any = None) -> FormData:
         """

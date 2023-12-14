@@ -55,12 +55,13 @@ def login_required(func: Callable[..., Any]) -> Callable[..., Any]:
         view, request = args[0], args[1]
         admin = getattr(view, "_admin_ref", view)
         auth_backend = getattr(admin, "authentication_backend", None)
+        app_name = getattr(admin, "app_name", "admin")
         if auth_backend is not None:
             response = await auth_backend.authenticate(request)
             if isinstance(response, Response):
                 return response
             if not bool(response):
-                return RedirectResponse(request.url_for("admin:login"), status_code=302)
+                return RedirectResponse(request.url_for(f"{app_name}:login"), status_code=302)
 
         if inspect.iscoroutinefunction(func):
             return await func(*args, **kwargs)

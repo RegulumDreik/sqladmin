@@ -8,8 +8,9 @@ if TYPE_CHECKING:
 
 
 class ItemMenu:
-    def __init__(self, name: str, icon: Optional[str] = None) -> None:
+    def __init__(self, name: str, icon: Optional[str] = None, app_name: str = "admin") -> None:
         self.name = name
+        self.app_name = app_name
         self.icon = icon
         self.parent: Optional["ItemMenu"] = None
         self.children: List["ItemMenu"] = []
@@ -56,8 +57,9 @@ class ViewMenu(ItemMenu):
         view: Union["BaseView", "ModelView"],
         name: str,
         icon: Optional[str] = None,
+        app_name: str = "admin"
     ) -> None:
-        super().__init__(name=name, icon=icon)
+        super().__init__(name=name, icon=icon, app_name=app_name)
         self.view = view
 
     def is_visible(self, request: Request) -> bool:
@@ -71,8 +73,8 @@ class ViewMenu(ItemMenu):
 
     def url(self, request: Request) -> Union[str, URL]:
         if self.view.is_model:
-            return request.url_for("admin:list", identity=self.view.identity)
-        return request.url_for(f"admin:{self.view.identity}")
+            return request.url_for(f"{self.app_name}:list", identity=self.view.identity)
+        return request.url_for(f"{self.app_name}:{self.view.identity}")
 
     @property
     def display_name(self) -> str:
