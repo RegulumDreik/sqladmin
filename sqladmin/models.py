@@ -703,22 +703,22 @@ class ModelView(BaseView, metaclass=ModelViewMeta):
         else:
             return await anyio.to_thread.run_sync(self._run_query_sync, stmt)
 
-    def _url_for_delete(self, request: Request, obj: Any) -> str:
+    def _url_for_delete(self, request: Request, obj: Any, app_name = "admin") -> str:
         pk = get_object_identifier(obj)
         query_params = urlencode({"pks": pk})
         url = request.url_for(
-            "admin:delete", identity=slugify_class_name(obj.__class__.__name__)
+            f"{app_name}:delete", identity=slugify_class_name(obj.__class__.__name__)
         )
         return str(url) + "?" + query_params
 
-    def _url_for_details_with_prop(self, request: Request, obj: Any, prop: str) -> URL:
+    def _url_for_details_with_prop(self, request: Request, obj: Any, prop: str, app_name = "admin") -> URL:
         target = getattr(obj, prop, None)
         if target is None:
             return URL()
-        return self._build_url_for("admin:details", request, target)
+        return self._build_url_for(f"{app_name}:details", request, target)
 
-    def _url_for_action(self, request: Request, action_name: str) -> str:
-        return str(request.url_for(f"admin:action-{self.identity}-{action_name}"))
+    def _url_for_action(self, request: Request, action_name: str, app_name = "admin") -> str:
+        return str(request.url_for(f"{app_name}:action-{self.identity}-{action_name}"))
 
     def _build_url_for(self, name: str, request: Request, obj: Any) -> URL:
         return request.url_for(

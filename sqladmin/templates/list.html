@@ -61,7 +61,7 @@
             </a>
             {% else %}
             <a class="dropdown-item" id="action-custom-{{ custom_action }}" href="#"
-              data-url="{{ model_view._url_for_action(request, custom_action) }}">
+              data-url="{{ model_view._url_for_action(request, custom_action, admin.app_name) }}">
               {{ label }}
             </a>
             {% endif %}
@@ -132,7 +132,7 @@
               {% endif %}
               {% if model_view.can_delete %}
               <a href="#" data-name="{{ model_view.name }}" data-pk="{{ get_object_identifier(row) }}"
-                data-url="{{ model_view._url_for_delete(request, row) }}" data-bs-toggle="modal"
+                data-url="{{ model_view._url_for_delete(request, row, admin.app_name) }}" data-bs-toggle="modal"
                 data-bs-target="#modal-delete" title="Delete">
                 <span class="me-1"><i class="fa-solid fa-trash"></i></span>
               </a>
@@ -148,7 +148,7 @@
               {% endfor %}
             </td>
             {% else %}
-            <td><a href="{{ model_view._url_for_details_with_prop(request, row, name) }}">{{ formatted_value }}</a></td>
+            <td><a href="{{ model_view._url_for_details_with_prop(request, row, name, admin.app_name) }}">{{ formatted_value }}</a></td>
             {% endif %}
             {% else %}
             <td>{{ formatted_value }}</td>
@@ -213,7 +213,7 @@
   {% for custom_action in model_view._custom_actions_in_list %}
   {% if custom_action in model_view._custom_actions_confirmation %}
   {% with confirmation_message = model_view._custom_actions_confirmation[custom_action], custom_action=custom_action,
-  url=model_view._url_for_action(request, custom_action) %}
+  url=model_view._url_for_action(request, custom_action, admin.app_name) %}
   {% include 'modals/list_action_confirmation.html' %}
   {% endwith %}
   {% endif %}

@@ -32,7 +32,7 @@
                 {% endfor %}
               </td>
               {% else %}
-              <td><a href="{{ model_view._url_for_details_with_prop(request, model, name) }}">{{ formatted_value }}</a>
+              <td><a href="{{ model_view._url_for_details_with_prop(request, model, name, admin.app_name) }}">{{ formatted_value }}</a>
               </td>
               {% endif %}
               {% else %}
@@ -53,7 +53,7 @@
           {% if model_view.can_delete %}
           <div class="col-md-1">
             <a href="#" data-name="{{ model_view.name }}" data-pk="{{ get_object_identifier(model) }}"
-              data-url="{{ model_view._url_for_delete(request, model) }}" data-bs-toggle="modal"
+              data-url="{{ model_view._url_for_delete(request, model, admin.app_name) }}" data-bs-toggle="modal"
               data-bs-target="#modal-delete" class="btn btn-danger">
               Delete
             </a>
@@ -74,7 +74,7 @@
               {{ label }}
             </a>
             {% else %}
-            <a href="{{ model_view._url_for_action(request, custom_action) }}?pks={{ get_object_identifier(model) }}"
+            <a href="{{ model_view._url_for_action(request, custom_action, admin.app_name) }}?pks={{ get_object_identifier(model) }}"
               class="btn btn-secondary">
               {{ label }}
             </a>
@@ -93,7 +93,7 @@
 {% for custom_action in model_view._custom_actions_in_detail %}
 {% if custom_action in model_view._custom_actions_confirmation %}
 {% with confirmation_message = model_view._custom_actions_confirmation[custom_action], custom_action=custom_action,
-url=model_view._url_for_action(request, custom_action) + '?pks=' + (get_object_identifier(model) | string) %}
+url=model_view._url_for_action(request, custom_action, admin.app_name) + '?pks=' + (get_object_identifier(model) | string) %}
 {% include 'modals/details_action_confirmation.html' %}
 {% endwith %}
 {% endif %}
